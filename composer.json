@@ -1,0 +1,22 @@
+{
+    "name": "aurel/projekt",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Aurel Dragut",
+            "email": "aurel.dragut@gmail.com"
+        }
+    ],
+	"autoload": {
+		"psr-4" : {
+            "Classes\\": "./classes/",
+            "Controllers\\": "./controllers/"
+        }
+	},
+    "require": {
+        "twig/twig": "^3.0",
+      "ext-pdo": "*",
+        "vlucas/phpdotenv": "^5.2",
+        "phpmailer/phpmailer": "^6.1"
+    }
+}

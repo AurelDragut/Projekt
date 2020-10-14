@@ -1,0 +1,82 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+
+{% autoescape false %}
+    {% if page.schnecke is empty %}
+        <div class="container-fluid">
+            <div class="container">
+                <div class="row">
+                    <h2>ÜBER MICH</h2>
+                    <h3>Ich bin ein leidenschaftlicher Webentwickler</h3>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <p>Hallo, ich bin Aurel Drăguț, ein Webentwickler mit über 10 Jahren Erfahrung in der Website-Entwicklung. Ich habe 2007 als Programmierer angefangen und bin seit 2015 hauptberuflich freiberuflich tätig.,</p>
+                        <p>Ich bin begeistert von dem, was ich tue, und bin ständig auf dem neuesten Stand der Technik, um moderne Lösungen zu implementieren, die mit den Bedürfnissen meiner Kunden kompatibel sind. Ich glaube gerne, dass ich und jeder meiner Kunden ein Team bilden und unser Geschäft sich gegenseitig helfen kann, was mich dazu veranlasst, jedes Mal die besten Webservices anzubieten.
+                        </p>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 ueber-mich-photo">
+                        <img src="https://aureldragut.com/wp-content/uploads/2020/06/about_me_photo.webp" class="attachment-large size-large" alt="about me photo" srcset="https://aureldragut.com/wp-content/uploads/2020/06/about_me_photo.webp 580w, https://aureldragut.com/wp-content/uploads/2020/06/about_me_photo-300x169.webp.pagespeed.ce.42n-GijhwN.webp 300w" sizes="(max-width: 580px) 100vw, 580px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="container">
+                <div class="row">
+                    <h2>MEINE DIENSTLEISTUNGEN</h2>
+                </div>
+                <div class="row dienstleistungen">
+                    {% for dienstleistung in page.dienstleistungen %}
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+                            <h4>{{ dienstleistung.titel }}</h4><p>{{ dienstleistung.inhalt }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="container">
+                <div class="row">
+                    <h2>MEIN <span>PORTFOLIO</span></h2>
+                </div>
+                <div class="row">
+                    <ul style="padding-left: 0; width: 100%">
+                        {% for site in page.portfolio %}
+                        <li class="col-md-4 col-sm-6 mix all branding package" style="display: inline-block;padding: 0 !important;margin:0 !important;" data-bound="">
+                            <div class="box">
+                                <img alt="DJ Undoo" src="{{ site.bild }}" style="width: 100%">
+                                <div class="box-content">
+                                    <div class="content">
+                                        <h3 class="title"><a href="{{ site.url }}" target="_blank" rel="nofollow noopener">{{ site.titel }}</a></h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% elseif (page.schnecke == 'blog') %}
+        <div class="container main-content">
+        {% for beitrag in page.beitraege %}
+            <div class="post-preview">
+                <h2><a href="/posts/{{ beitrag.schnecke }}">{{ beitrag.titel }}</a></h2>
+                <p class="post-meta">Erstellt am {{ beitrag.erstellt_um | date("d M Y") }} von Aurel Dragut</p>
+                <div>
+                    {{ beitrag.inhalt|split('</p>')|first }}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="container main-content">
+            {{ page.inhalt }}
+        </div>
+    {% endif %}
+{% endautoescape %}
+
+{% endblock %}
+

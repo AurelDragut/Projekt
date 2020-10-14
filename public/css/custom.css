@@ -1,0 +1,61 @@
+.main-content {
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+}
+
+@media (min-width: 992px) {
+    .col-lg-8 {
+        -ms-flex: 0 0 100%;
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    #mainNav.is-fixed {
+        position: fixed;
+        top: -100px;
+        transition: transform .2s;
+        border-bottom: 1px solid #fff;
+        background-color: rgba(255,255,255,.9);
+    }
+}
+
+
+@media (min-width: 768px) {
+    .col-md-4 {
+        -ms-flex: 0 0 33.333333%;
+        /* flex: 0 0 33.333333%; */
+        max-width: 33% !important;
+    }
+}
+
+.col-md-6.col-sm-6.col-xs-12 img {
+    width: 100% !important;
+}
+
+.ueber-mich-photo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.dienstleistungen > div {
+    border: 1px inset gray;
+    margin: 1px !important;
+    padding: 15px !important;
+}
+
+div.container-fluid {
+    padding-bottom: 15px;
+    padding-top: 15px;
+}
+
+div.container-fluid:nth-child(even), footer {
+    background-color: lightgray;
+}
+
+header.masthead {
+    margin-bottom: 0 !important;
+}
+div.row:first-child {
+    display: block !important;
+}
