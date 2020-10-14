@@ -59,3 +59,11 @@ header.masthead {
 div.row:first-child {
     display: block !important;
 }
+
+div.first, .mt-100 {
+    margin-top: 100px !important;
+}
+
+.table * {
+    font-size: 13px !important;
+}

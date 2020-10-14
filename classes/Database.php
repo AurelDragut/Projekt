@@ -8,6 +8,7 @@ use Dotenv\Dotenv;
 use PDO;
 use PDOException;
 use Twig\Environment;
+use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
 
 /**
@@ -150,7 +151,7 @@ class Database
         }
         $formular['fields'] = $fields;
         $formular['action'] = $action;
-        $this->twig->addExtension(new \Twig\Extension\DebugExtension()); // ,['cache' => 'compilation_cache',]
+        $this->twig->addExtension(new DebugExtension()); // ,['cache' => 'compilation_cache',]
         return $this->twig->render('parts/formular.html.twig', ['formular' => $formular]);
     }
 
@@ -160,4 +161,19 @@ class Database
         $result = $stmt->fetch();
         return $result;
     }
+
+    public function delete($table, $slug){
+
+		// query to insert record
+		$query = "DELETE FROM " . $table . " WHERE `schnecke`= '$slug'";
+
+		// prepare query
+		$stmt = $this->pdo->prepare($query);
+
+		// execute query
+		if($stmt->execute()){
+			return true;
+		}
+		return false;
+	}
 }

@@ -53,7 +53,7 @@ Route::add('/admin/register', function () use ($db) {
     echo $db->save('users',$user, ['name','nachname','username','email','password']);
 }, 'post');
 
-Route::add('/admin', function () use ($db) {
+Route::add('/admin', function () use ($db, $twig) {
    $tablesList = $db->query('show tables');
    $tablesList = $tablesList->fetchAll();
    $list = [];
@@ -62,6 +62,45 @@ Route::add('/admin', function () use ($db) {
            $list[] = $value;
        }
    }
+   $page = [];
+   $page['menu'] = $list;
+   echo $twig->render('admin/page.html.twig', ['page' => $page]);
+});
+
+// Accept only numbers as parameter. Other characters will result in a 404 error
+Route::add('/admin/([0-9a-z\-]*)', function($page) use ($twig, $db, $menu) {
+
+	$tablesList = $db->query('show tables');
+	$tablesList = $tablesList->fetchAll();
+	$list = [];
+	foreach ($tablesList as $table) {
+		foreach ($table as $key => $value) {
+			$list[] = $value;
+		}
+	}
+
+	$items = [];
+	$pageData = $db->index($page);
+
+	foreach($pageData as $value) {
+		$tableHeaders = array_keys($value);
+	}
+
+	for($i=0;$i<count($pageData);$i++) {
+		$items[$i] = $pageData[$i];
+	}
+
+	$tableItems = $items;
+
+	$pageData['headers'] = $tableHeaders;
+	$pageData['items'] = $tableItems;
+
+	foreach ($_GET as $key => $value) {
+		$page['get_'.$key] = $value;
+	}
+	$pageData['createIcon'] = '<a class="nav-link" href="/admin/'.$page.'/create" alt=""><img src="/public/img/icons/create.jpg" width="32" /></a>';
+	$pageData['menu'] = $list;
+	echo $twig->render('admin/page.html.twig', ['page' => $pageData]);
 });
 
 Route::add('/kontakt', function (){

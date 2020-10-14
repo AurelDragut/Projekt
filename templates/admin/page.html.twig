@@ -1,0 +1,40 @@
+{% extends "admin/base.html.twig" %}
+
+{% block content %}
+
+{% autoescape false %}
+    <div class="container main-content mt-100">
+        <table class="table">
+            <thead class="thead-dark">
+            <tr>
+            {% for head in page.headers %}
+                <th scope="col">{{ head | replace({'_':' '}) | capitalize }}</th>
+            {% endfor %}
+                <th scope="col">Operationen</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for item in page.items %}
+                    <tr>
+                    {% for field in item %}
+                        <td>
+                            {% if field == item.bild %}
+                                <img src="{{ field }}" width="100" alt="" />
+                            {% else %}
+                                {{ field | striptags | split('',50) | first }}</td>
+                            {% endif %}
+                    {% endfor %}
+                        <td>
+                            <a href="{{ item.id }}/read"><img style="width:24px" src="/public/img/icons/read.jpg" alt="" /></a>
+                            <a href="{{ item.id }}/update"><img style="width:24px" src="/public/img/icons/update.jpg" alt="" /></a>
+                            <a href="{{ item.id }}/delete"><img style="width:24px" src="/public/img/icons/delete.jpg" alt="" /></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endautoescape %}
+
+{% endblock %}
+
