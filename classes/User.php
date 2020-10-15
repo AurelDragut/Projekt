@@ -6,6 +6,7 @@ namespace Classes;
 
 class User
 {
+    public $fillable = ['name','nachname','username','email','password'];
     public static function login($login) {
         $db = new Database();
         $checkLogin = $db->query("select * from `users` where `username` ='".$login['username']."'");
@@ -18,5 +19,10 @@ class User
         } else {
             header('Location:/admin/login?message=Es gibt keine Benutzernamendaten, die diesen Benutzernamen und dieses Passwort enthalten');
         }
+    }
+
+    public function logout() {
+        unset($_SESSION['logged_in']);
+        unset($_SESSION['username']);
     }
 }

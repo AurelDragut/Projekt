@@ -4,6 +4,7 @@
 
 {% autoescape false %}
     <div class="container main-content mt-100">
+        {% if page.headers %}
         <table class="table">
             <thead class="thead-dark">
             <tr>
@@ -20,19 +21,40 @@
                         <td>
                             {% if field == item.bild %}
                                 <img src="{{ field }}" width="100" alt="" />
+                            {% elseif field == item.email %}
+                                <a href="mailto:{{ field }}" target="_blank">{{ field }}</a>
+                            {% elseif field == item.url %}
+                                <a href="{{ field }}" target="_blank">{{ field }}</a>
                             {% else %}
                                 {{ field | striptags | split('',50) | first }}</td>
                             {% endif %}
                     {% endfor %}
                         <td>
-                            <a href="{{ item.id }}/read"><img style="width:24px" src="/public/img/icons/read.jpg" alt="" /></a>
-                            <a href="{{ item.id }}/update"><img style="width:24px" src="/public/img/icons/update.jpg" alt="" /></a>
-                            <a href="{{ item.id }}/delete"><img style="width:24px" src="/public/img/icons/delete.jpg" alt="" /></a>
+                            <a href="{{ page.pageTable }}/{{ item.id }}/edit"><img style="width:36px" src="/public/img/icons/update.jpg" alt="" /></a>
+                            <a href="{{ page.pageTable }}/{{ item.id }}/delete"><img style="width:36px" src="/public/img/icons/delete.jpg" alt="" /></a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Tabelle</th>
+                    <th scope="col">Zeilenanzahl</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for section in page.menu %}
+                <tr>
+                    <td>{{ section.item | capitalize }}</td>
+                    <td>{{ section.count }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     </div>
 {% endautoescape %}
 

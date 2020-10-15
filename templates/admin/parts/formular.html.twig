@@ -1,19 +1,26 @@
-{% extends "auth/base.html.twig" %}
+{% extends "admin/base.html.twig" %}
 
 {% block content %}
-<form action="{{ formular.action }}" method="post">
-    {% for field in formular.fields %}
-    <div class="form-group">
-        <label for="{{ field.Field }}">{{ field.Field | replace({'_': ' '}) | capitalize }}</label>
-        {% if field.Type == 'text' %}
-            <textarea class="form-control" id="{{ field.Field }}" name="{{ field.Field }}" rows="5" cols="80"></textarea>
-        {% elseif 'password' in field.Field %}
-            <input type="password" class="form-control" id="{{ field.Field }}" name="{{ field.Field }}">
-        {% else %}
-            <input type="text" class="form-control" id="{{ field.Field }}" name="{{ field.Field }}">
-        {% endif %}
+    <div class="container main-content mt-100">
+    <form action="{{ formular.action }}" method="post" enctype="multipart/form-data">
+        {% for field in formular.fields %}
+            <div class="form-group">
+                {% if 'schnecke' not in field.Field %}<label for="{{ field.Field }}">{{ field.Field | replace({'_': ' '}) | capitalize }}</label>{% endif %}
+                {% if field.Type == 'text' %}
+                    <textarea class="form-control" id="{{ field.Field }}" name="{{ field.Field }}" rows="5"
+                              cols="80">{{ formular.inhalt[field.Field] }}</textarea>
+                {% elseif 'password' in field.Field %}
+                    <input type="password" class="form-control" id="{{ field.Field }}" name="{{ field.Field }}">
+                {% elseif 'schnecke' in field.Field %}
+                    <input type="hidden" class="form-control" id="{{ field.Field }}" name="{{ field.Field }}">
+                {% elseif 'bild' in field.Field %}
+                    <input type="file" class="form-control" id="{{ field.Field }}" name="{{ field.Field }}">
+                {% else %}
+                    <input type="text" class="form-control" id="{{ field.Field }}" name="{{ field.Field }}" value="{{ formular.inhalt[field.Field] }}">
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
     </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 {% endblock %}

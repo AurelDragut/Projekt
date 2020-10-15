@@ -67,3 +67,14 @@ div.first, .mt-100 {
 .table * {
     font-size: 13px !important;
 }
+
+.nav-link.create {
+    padding: 0 20px !important;
+}
+.nav-link.btn.btn-secondary.btn-sm {
+    padding: 6px 20px !important;
+}
+
+.bg-dark {
+    background-color: lightgray !important;
+}

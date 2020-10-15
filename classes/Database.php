@@ -49,40 +49,57 @@ class Database
 
     public function save($table, $object, $fillable) {
 
-        $fields = [];
-        foreach ($fillable as $key => $value) {
-            $fields[$key] = $value;
+        $fieldsList = implode(',',$fillable);
+        $fieldsValue = [];
+        foreach ($object as $key => $value) {
+            if ($key == 'confirm_password') continue;
+            if ($key == 'password') $fieldsValue[$key] = password_hash($value,PASSWORD_BCRYPT); else
+            if($key == 'bild') {
+                $target_dir = "public/img/uploads/";
+                $target_file = $target_dir . basename($_FILES["bild"]["name"]);
+                $uploadOk = 1;
+                $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+
+// Check if image file is a actual image or fake image
+                if(isset($_POST["submit"])) {
+                    $check = getimagesize($_FILES["bild"]["tmp_name"]);
+                    if($check !== false) $uploadOk = 1; else $uploadOk = 0;
+                }
+
+// Allow certain file formats
+                if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+                    && $imageFileType != "gif" ) {
+                    echo "$imageFileType Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+                    $uploadOk = 0;
+                }
+
+// Check if $uploadOk is set to 0 by an error
+                if ($uploadOk == 0) {
+                    echo "Sorry, your file was not uploaded.";
+// if everything is ok, try to upload file
+                } else {
+                    if (!move_uploaded_file($_FILES["bild"]["tmp_name"], $target_file)) {
+                        echo "Sorry, there was an error uploading your file.";
+                    }
+                }
+                $fieldsValue[$key] = '/'.$target_file;
+            } else {
+                $fieldsValue[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+            }
         }
+        if(in_array('schnecke',$fillable)) $fieldsValue['schnecke'] = str_replace(' ','-',strtolower($fieldsValue['titel']));
 
-        $fieldsArray = array_map(function ($m) { return ':'.$m; }, $fields);
-
-        $fieldsList = implode(',',$fieldsArray);
+        $fieldsValue = array_map(function ($m) { return $m = '\''.$m.'\'';}, $fieldsValue);
+        $fieldsValue = implode(',',$fieldsValue);
 
         //generate a prepare query with those fields
-        $query = "INSERT INTO `$table` (".str_replace(':','',$fieldsList).") VALUES ($fieldsList)";
+        $query = "INSERT INTO `$table` ($fieldsList) VALUES ($fieldsValue)";
 
         //run query
         try {
-            $stmt = $this->pdo->prepare($query);
+            $stmt = $this->pdo->query($query);
         } catch (PDOException $e) {
-            echo "Prepare failed: " . $e->getMessage();
-        }
-
-        //bind items to query
-        foreach ($object as $key => $value) {
-            if ($key == 'confirm_password') continue;
-            try {
-                $stmt->bindValue(':' . $key, $value);
-            } catch (PDOException $e) {
-                echo "Binding parameters failed: " . $e->getMessage();
-            }
-        }
-
-        //testing execution
-        try {
-            $stmt->execute();
-        } catch (PDOException $e){
-            return "Execute failed: " . $e->getMessage();
+            return "Prepare failed: " . $e->getMessage();
         }
     }
 
@@ -94,35 +111,19 @@ class Database
         }
         $fields = '';
         foreach ($fieldValues as $key => $value) {
-            $fields .= $key.'='.$value.', ';
+            $fields .= $key.'=\''.$value.'\', ';
         }
         $fields = rtrim($fields,', ');
 
         //generate a prepare query with those fields
         $query = "UPDATE `$table` set $fields WHERE `id` = '$id'";
 
+
         //run query
         try {
-            $stmt = $this->pdo->prepare($query);
+            $stmt = $this->pdo->query($query);
         } catch (PDOException $e) {
-            echo "Prepare failed: " . $e->getMessage();
-        }
-
-        //bind items to query
-        foreach ($object as $key => $value) {
-            if ($key == 'confirm_password') continue;
-            try {
-                $stmt->bindValue(':' . $key, $value);
-            } catch (PDOException $e) {
-                echo "Binding parameters failed: " . $e->getMessage();
-            }
-        }
-
-        //testing execution
-        try {
-            $stmt->execute();
-        } catch (PDOException $e){
-            return "Execute failed: " . $e->getMessage();
+            echo "Query failed: " . $e->getMessage();
         }
     }
 
@@ -146,18 +147,44 @@ class Database
         foreach ($fieldsList as $key => $value) {
             if (in_array($value['Field'], $fillable)) $fields[] = $value;
         }
-        if ($action == '/admin/register') {
+        if (in_array($action,array('/admin/register','/admin/users/save'))) {
             $fields[] = array( "Field" => "confirm_password", "Type" => "varchar(255)", "Null" => "NO", "Key" => "", "Default" => NULL, "Extra" => "");
         }
         $formular['fields'] = $fields;
         $formular['action'] = $action;
         $this->twig->addExtension(new DebugExtension()); // ,['cache' => 'compilation_cache',]
-        return $this->twig->render('parts/formular.html.twig', ['formular' => $formular]);
+        return $this->twig->render('admin/parts/formular.html.twig', ['formular' => $formular]);
     }
 
-    public function show($table, $slug) {
-        $stmt = $this->pdo->prepare("SELECT * FROM `$table` WHERE `schnecke`=?");
-        $stmt->execute([$slug]);
+    public function edit($table,$id, $action, $fillable) {
+        $tableFields = $this->pdo->query("SHOW FIELDS FROM `$table`");
+        $fieldsList = $tableFields->fetchAll();
+
+        $fields = [];
+        foreach ($fieldsList as $key => $value) {
+            if (in_array($value['Field'], $fillable)) $fields[] = $value;
+        }
+        if (in_array($action,array('/admin/register','/admin/users/save'))) {
+            $fields[] = array( "Field" => "confirm_password", "Type" => "varchar(255)", "Null" => "NO", "Key" => "", "Default" => NULL, "Extra" => "");
+        }
+
+        $object = [];
+        $objectData = $this->show($table,$id);
+        foreach ($objectData as $key => $value) {
+            if (in_array($key,$fillable)) $object[$key] = $value;
+        }
+
+        $formular['fields'] = $fields;
+        $formular['action'] = $action;
+
+        $formular['inhalt'] = $object;
+
+        return $this->twig->render('admin/parts/formular.html.twig', ['formular' => $formular]);
+    }
+
+    public function show($table, $id) {
+        $stmt = $this->pdo->prepare("SELECT * FROM `$table` WHERE `id`=?");
+        $stmt->execute([$id]);
         $result = $stmt->fetch();
         return $result;
     }
@@ -165,7 +192,7 @@ class Database
     public function delete($table, $slug){
 
 		// query to insert record
-		$query = "DELETE FROM " . $table . " WHERE `schnecke`= '$slug'";
+		$query = "DELETE FROM " . $table . " WHERE `id`= '$slug'";
 
 		// prepare query
 		$stmt = $this->pdo->prepare($query);

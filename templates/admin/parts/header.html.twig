@@ -10,12 +10,18 @@
             <ul class="navbar-nav mr-auto">
                 {% for menuitem in page.menu %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/{{ menuitem }}">{{ menuitem }}</a>
+                    <a class="nav-link" href="/admin/{{ menuitem.item }}">{{ menuitem.item }}</a>
                 </li>
                 {% endfor %}
                 <li class="nav-item">
                     {{ page.createIcon | raw }}
-
+                </li>
+                <li class="nav-item">
+                    {% if session.logged_in %}
+                        <a class="nav-link btn btn-secondary btn-sm" href="/admin/logout">Abmeldung</a>
+                    {% else %}
+                        <a class="nav-link btn btn-secondary btn-sm" href="/admin/login">Anmeldung</a>
+                    {% endif %}
                 </li>
             </ul>
         </div>
