@@ -31,11 +31,15 @@ class Database
 
 	public function __construct()
 	{
+		//Laden der Konfigurationsdatei
 		$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 		$dotenv->load();
+
+		//Template-Engine-Auslastung
 		$loader = new FilesystemLoader("templates");
 		$this->twig = new Environment($loader, ['debug' => true,]);
 
+		//pdo-Initialisierung
 		$this->host = $_ENV['DB_HOST'];
 		$this->dbname = $_ENV['DB_NAME'];
 		$this->user = $_ENV['DB_USER'];
@@ -48,9 +52,9 @@ class Database
 		}
 	}
 
+	//Einträge in der Datenbank speichern
 	public function save($table, $object, $fillable)
 	{
-
 		$fieldsList = implode(',', $fillable);
 		$fieldsValue = [];
 		foreach ($object as $key => $value) {
