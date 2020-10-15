@@ -70,9 +70,9 @@ Route::add('/admin', function () use ($db, $twig) {
     $i=0;
     foreach ($tablesList as $key => $value) {
 
-        foreach ($value as $key => $value) {
-            $list[$i]['item'] = $value;
-            $itemsCount = $db->index($value);
+        foreach ($value as $key2 => $value2) {
+            $list[$i]['item'] = $value2;
+            $itemsCount = $db->index($value2);
             $list[$i]['count'] = count($itemsCount);
         }
         $i++;
@@ -96,9 +96,9 @@ Route::add('/admin/([0-9a-z\-]*)/create', function($page) use ($twig, $db, $menu
     $i=0;
     foreach ($tablesList as $key => $value) {
 
-        foreach ($value as $key => $value) {
-            $list[$i]['item'] = $value;
-            $itemsCount = $db->index($value);
+        foreach ($value as $key2 => $value2) {
+            $list[$i]['item'] = $value2;
+            $itemsCount = $db->index($value2);
             $list[$i]['count'] = count($itemsCount);
         }
         $i++;
@@ -107,6 +107,7 @@ Route::add('/admin/([0-9a-z\-]*)/create', function($page) use ($twig, $db, $menu
     $items = [];
     $pageData = $db->index($page);
 
+	$tableHeaders = [];
     foreach($pageData as $value) {
         $tableHeaders = array_keys($value);
     }
@@ -118,6 +119,7 @@ Route::add('/admin/([0-9a-z\-]*)/create', function($page) use ($twig, $db, $menu
     $pageData['headers'] = $tableHeaders;
     $pageData['items'] = $items;
 
+    $fillable = [];
     switch ($page) {
         case 'beitraege':
             $fillable = ['titel','schnecke','inhalt','bild'];
@@ -141,7 +143,7 @@ Route::add('/admin/([0-9a-z\-]*)/create', function($page) use ($twig, $db, $menu
     foreach ($_GET as $key => $value) {
         $page['get_'.$key] = $value;
     }
-    $pageData['createIcon'] = '<a class="nav-link create" href="/admin/'.$page.'/create" alt=""><img src="/public/img/icons/create.jpg" width="32" /></a>';
+    $pageData['createIcon'] = '<a class="nav-link create" href="/admin/'.$page.'/create"><img src="/public/img/icons/create.jpg" width="32" alt="" /></a>';
     $pageData['menu'] = $list;
     echo $db->create($page,"/admin/$page/save", $fillable);
 });
@@ -155,28 +157,15 @@ Route::add('/admin/([0-9a-z\-]*)/([0-9]*)/edit', function($page, $id) use ($twig
     $i=0;
     foreach ($tablesList as $key => $value) {
 
-        foreach ($value as $key => $value) {
-            $list[$i]['item'] = $value;
-            $itemsCount = $db->index($value);
+        foreach ($value as $key2 => $value2) {
+            $list[$i]['item'] = $value2;
+            $itemsCount = $db->index($value2);
             $list[$i]['count'] = count($itemsCount);
         }
         $i++;
     }
 
-    $items = [];
-    $pageData = $db->index($page);
-
-    foreach($pageData as $value) {
-        $tableHeaders = array_keys($value);
-    }
-
-    for($i=0;$i<count($pageData);$i++) {
-        $items[$i] = $pageData[$i];
-    }
-
-    $pageData['headers'] = $tableHeaders;
-    $pageData['items'] = $items;
-
+    $fillable = [];
     switch ($page) {
         case 'beitraege':
             $fillable = ['titel','schnecke','inhalt','bild'];
@@ -197,10 +186,7 @@ Route::add('/admin/([0-9a-z\-]*)/([0-9]*)/edit', function($page, $id) use ($twig
             break;
     }
 
-    foreach ($_GET as $key => $value) {
-        $page['get_'.$key] = $value;
-    }
-    $pageData['createIcon'] = '<a class="nav-link create" href="/admin/'.$page.'/create" alt=""><img src="/public/img/icons/create.jpg" width="32" /></a>';
+    $pageData['createIcon'] = '<a class="nav-link create" href="/admin/'.$page.'/create"><img src="/public/img/icons/create.jpg" width="32" alt="" /></a>';
     $pageData['menu'] = $list;
     echo $db->edit($page, $id, "/admin/$page/$id/update", $fillable);
 });
@@ -212,6 +198,8 @@ Route::add('/admin/([0-9a-z\-]*)/save', function($page) use ($twig, $db, $menu) 
         if ($key == 'schnecke') $$page[$key] = str_replace(' ','-',strtolower($$page['titel'])); else
         $$page[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
     }
+
+    $fillable = [];
     switch ($page) {
         case 'beitraege':
             $fillable = ['titel','schnecke','inhalt','bild'];
@@ -243,9 +231,12 @@ Route::add('/admin/([0-9a-z\-]*)/([0-9]*)/update', function($page,$id) use ($twi
     $$page =[];
 
     foreach ($_POST as $key => $value) {
-        if ($key == 'schnecke') $$page[$key] = str_replace(' ','-',strtolower($$page['titel'])); else
-            $$page[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+        if ($key == 'schnecke') $$page[$key] = str_replace(' ','-',strtolower($$page['titel']));
+        elseif(!$_FILES) unset($$page['bild']);
+        else $$page[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
     }
+
+    $fillable = [];
     switch ($page) {
         case 'beitraege':
             $fillable = ['titel','schnecke','inhalt','bild'];
@@ -274,18 +265,17 @@ Route::add('/admin/([0-9a-z\-]*)/([0-9]*)/update', function($page,$id) use ($twi
 }, 'post');
 
 // Accept only numbers as parameter. Other characters will result in a 404 error
-Route::add('/admin/([0-9a-z\-]*)', function($page) use ($twig, $db, $menu, $logged_in) {
+Route::add('/admin/([0-9a-z\-]*)', function($page) use ($twig, $db, $menu) {
     if (!$_SESSION['logged_in']) header('Location:/admin/login');
 	$tablesList = $db->query('show tables');
 	$tablesList = $tablesList->fetchAll();
-
     $list = [];
     $i=0;
     foreach ($tablesList as $key => $value) {
 
-        foreach ($value as $key => $value) {
-            $list[$i]['item'] = $value;
-            $itemsCount = $db->index($value);
+        foreach ($value as $key2 => $value2) {
+            $list[$i]['item'] = $value2;
+            $itemsCount = $db->index($value2);
             $list[$i]['count'] = count($itemsCount);
         }
         $i++;
@@ -294,6 +284,7 @@ Route::add('/admin/([0-9a-z\-]*)', function($page) use ($twig, $db, $menu, $logg
 	$items = [];
 	$pageData = $db->index($page);
 
+	$tableHeaders = '';
 	foreach($pageData as $value) {
 		$tableHeaders = array_keys($value);
 	}
@@ -310,10 +301,9 @@ Route::add('/admin/([0-9a-z\-]*)', function($page) use ($twig, $db, $menu, $logg
 	foreach ($_GET as $key => $value) {
 		$page['get_'.$key] = $value;
 	}
-	$pageData['createIcon'] = '<a class="nav-link create" href="/admin/'.$page.'/create" alt=""><img src="/public/img/icons/create.jpg" width="32" /></a>';
+	$pageData['createIcon'] = '<a class="nav-link create" href="/admin/'.$page.'/create"><img src="/public/img/icons/create.jpg" width="32" alt="" /></a>';
 	$pageData['menu'] = $list;
 	$pageData['pageTable'] = $page;
-	$pageData['logged_in'] = $logged_in;
 	echo $twig->render('admin/page.html.twig', ['page' => $pageData]);
 });
 

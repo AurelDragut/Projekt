@@ -6,7 +6,7 @@ namespace Classes;
 
 class User
 {
-    public $fillable = ['name','nachname','username','email','password'];
+    public array $fillable = ['name','nachname','username','email','password'];
     public static function login($login) {
         $db = new Database();
         $checkLogin = $db->query("select * from `users` where `username` ='".$login['username']."'");
@@ -21,7 +21,7 @@ class User
         }
     }
 
-    public function logout() {
+    public static function logout() {
         unset($_SESSION['logged_in']);
         unset($_SESSION['username']);
     }
